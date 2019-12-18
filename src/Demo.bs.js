@@ -4,33 +4,21 @@
 var Js_exn = require("bs-platform/lib/js/js_exn.js");
 var Express = require("bs-express/src/Express.js");
 var Process = require("process");
-var Caml_array = require("bs-platform/lib/js/caml_array.js");
+var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
 var Caml_js_exceptions = require("bs-platform/lib/js/caml_js_exceptions.js");
+var RouteAlertBehavior = require("route-alert-behavior/src/RouteAlertBehavior.bs.js");
 
 var app = Express.express(/* () */0);
 
 var router = Express.router(undefined, undefined, undefined, /* () */0);
 
-var routes = /* array */[
-  "/1",
-  "/2",
-  "/3"
-];
+Express.App.use(app, Express.Middleware.json(undefined, undefined, undefined, /* () */0));
 
-for(var i = 0; i <= 2; ++i){
-  Express.App.get(app, Caml_array.caml_array_get(routes, i), Express.Middleware.from((function(i){
-          return function (_req, _next) {
-            var partial_arg = String(i);
+Express.App.post(app, "/route_alerts", Express.Middleware.from((function (_next, req) {
+            console.log(Express.$$Request.bodyJSON(req));
+            var partial_arg = RouteAlertBehavior.createRouteAlertEffectHandler(Belt_Option.getExn(Express.$$Request.bodyJSON(req)));
             return (function (param) {
-                return Express.$$Response.sendString(partial_arg, param);
-              });
-          }
-          }(i))));
-}
-
-Express.Router.post(router, "/route_alerts", Express.Middleware.from((function (_req, _next) {
-            return (function (param) {
-                return Express.$$Response.sendString("{msg:\"test\"}", param);
+                return Express.$$Response.sendJson(partial_arg, param);
               });
           })));
 
@@ -63,7 +51,6 @@ var server = Express.App.listen(app, 3000, onListen, /* () */0);
 
 exports.app = app;
 exports.router = router;
-exports.routes = routes;
 exports.onListen = onListen;
 exports.server = server;
 /* app Not a pure module */
