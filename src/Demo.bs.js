@@ -14,12 +14,16 @@ var router = Express.router(undefined, undefined, undefined, /* () */0);
 
 Express.App.use(app, Express.Middleware.json(undefined, undefined, undefined, /* () */0));
 
-Express.App.post(app, "/route_alerts", Express.Middleware.from((function (_next, req) {
+Express.App.options(app, "/route_alerts", Express.Middleware.from((function (param, param$1, res) {
+            Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
+            Express.$$Response.setHeader("Access-Control-Allow-Headers", "*", res);
+            return Express.$$Response.sendString("", res);
+          })));
+
+Express.App.post(app, "/route_alerts", Express.Middleware.from((function (_next, req, res) {
+            Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
             console.log(Express.$$Request.bodyJSON(req));
-            var partial_arg = RouteAlertBehavior.createRouteAlertEffectHandler(Belt_Option.getExn(Express.$$Request.bodyJSON(req)));
-            return (function (param) {
-                return Express.$$Response.sendJson(partial_arg, param);
-              });
+            return Express.$$Response.sendJson(RouteAlertBehavior.createRouteAlertEffectHandler(Belt_Option.getExn(Express.$$Request.bodyJSON(req))), res);
           })));
 
 Express.App.get(app, "/", Express.Middleware.from((function (_req, _next) {

@@ -3,6 +3,8 @@ open Belt.List;
 open Belt.Option;
 open RouteAlertBehavior;
 
+[@bs.val] external cors : (unit => unit, int) => float = "setTimeout";
+
 let app = express();
 let router = router();
 
@@ -18,16 +20,22 @@ forEach(requests, r => App.get(app, ~path=r) @@ Middleware.from((_req, _next) =>
 
 App.use(app, Middleware.json());
 
+App.options(app, ~path="/route_alerts")
+  @@ Middleware.from((_, _, res) => {
+    Response.setHeader("Access-Control-Allow-Origin", "*", res);
+    Response.setHeader("Access-Control-Allow-Headers", "*", res);    
+    Response.sendString("", res);
+  });
 
 App.post(app, ~path="/route_alerts")
-@@ Middleware.from((_next, req) => {
+@@ Middleware.from((_next, req, res) => {
+  Response.setHeader("Access-Control-Allow-Origin", "*", res);  
   Js.log(Request.bodyJSON(req));
   Request.bodyJSON(req)
     ->getExn
     ->createRouteAlertEffectHandler
-    ->Response.sendJson
+    ->Response.sendJson(res)
 });
-
 
 App.get(app, ~path="/") @@ Middleware.from((_req, _next) => Response.sendString("Hello, World!"));
     
