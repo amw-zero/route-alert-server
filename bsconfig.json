@@ -12,6 +12,7 @@
   "suffix": ".bs.js",
   "bs-dependencies": [
     "bs-express",
+    "bs-axios",
     "route-alert-behavior",
   ],
   "warnings": {

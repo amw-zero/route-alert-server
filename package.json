@@ -15,6 +15,7 @@
     "bs-platform": "^7.0.1"
   },
   "dependencies": {
+    "bs-axios": "0.0.42",
     "bs-express": "^1.0.0",
     "route-alert-behavior": "file:../route-alert-behavior"
   }
