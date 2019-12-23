@@ -7,6 +7,7 @@ var Js_exn = require("bs-platform/lib/js/js_exn.js");
 var Express = require("bs-express/src/Express.js");
 var Process = require("process");
 var Belt_Map = require("bs-platform/lib/js/belt_Map.js");
+var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
 var Caml_js_exceptions = require("bs-platform/lib/js/caml_js_exceptions.js");
 var RouteAlertBehavior = require("route-alert-behavior/src/RouteAlertBehavior.bs.js");
@@ -30,29 +31,21 @@ Express.App.options(app, "/route_alerts", Express.Middleware.from((function (par
             return Express.$$Response.sendString("", res);
           })));
 
-var mapApi = "https://maps.googleapis.com/maps/api/directions/json?origin=Port+Authority&destination=20+Remington+Dr+Freehold&key=AIzaSyC6AfIwElNGcfmzz-XyBHUb3ftWb2SL2vU&departure_time=now";
-
-var endpoint = Belt_Map.getExn(RouteAlertBehavior.endpointRegistry, /* RouteAlertCreate */0);
-
-Express.App.post(app, endpoint.path, Express.PromiseMiddleware.from((function (param, req, res) {
-            console.log("/route_alerts");
-            Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
-            return new Promise((function (resolve, param) {
-                            RouteAlertBehavior.createRouteAlertEffectHandler(Belt_Option.getExn(Express.$$Request.bodyJSON(req)), networkBridge, (function (json) {
-                                    return resolve(json);
-                                  }));
-                            return /* () */0;
-                          })).then((function (response) {
-                          console.log(response);
-                          return Promise.resolve(Express.$$Response.sendJson(response, res));
-                        }));
-          })));
-
-Express.App.post(app, "/route_alerts-axios", Express.PromiseMiddleware.from((function (param, param$1, res) {
-            return Axios.get(mapApi).then((function (response) {
-                          return Promise.resolve(Express.$$Response.sendJson(response.data, res));
-                        }));
-          })));
+Belt_Array.map(Belt_Map.valuesToArray(RouteAlertBehavior.endpointRegistry), (function (endpoint) {
+        return Express.App.post(app, endpoint.path, Express.PromiseMiddleware.from((function (param, req, res) {
+                          console.log("/route_alerts");
+                          Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
+                          return new Promise((function (resolve, param) {
+                                          RouteAlertBehavior.createRouteAlertEffectHandler(Belt_Option.getExn(Express.$$Request.bodyJSON(req)), networkBridge, (function (json) {
+                                                  return resolve(json);
+                                                }));
+                                          return /* () */0;
+                                        })).then((function (response) {
+                                        console.log(response);
+                                        return Promise.resolve(Express.$$Response.sendJson(response, res));
+                                      }));
+                        })));
+      }));
 
 Express.App.options(app, "/promise", Express.Middleware.from((function (param, param$1, res) {
             Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
@@ -102,8 +95,6 @@ var server = Express.App.listen(app, 3000, onListen, /* () */0);
 exports.app = app;
 exports.router = router;
 exports.networkBridge = networkBridge;
-exports.mapApi = mapApi;
-exports.endpoint = endpoint;
 exports.onListen = onListen;
 exports.server = server;
 /* app Not a pure module */

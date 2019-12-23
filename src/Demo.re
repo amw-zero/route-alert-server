@@ -7,16 +7,6 @@ open RouteAlertBehavior;
 let app = express();
 let router = router();
 
-/*
- let requests = [
-   "/1",`
-   "/2",
-   "/3"
- ];
-
- forEach(requests, r => App.get(app, ~path=r) @@ Middleware.from((_req, _next) => Response.sendString("test")))
- */
-
 let networkBridge = (request: serverRequest, respond) => {
   Js.Promise.(  
     Axios.get(request.path)
@@ -33,11 +23,9 @@ Middleware.from((_, _, res) => {
   Response.sendString("", res);
 });
 
-let mapApi = "https://maps.googleapis.com/maps/api/directions/json?origin=Port+Authority&destination=20+Remington+Dr+Freehold&key=AIzaSyC6AfIwElNGcfmzz-XyBHUb3ftWb2SL2vU&departure_time=now"
 
-let endpoint = Belt.Map.getExn(endpointRegistry, RouteAlertCreate);
-
-App.post(app, ~path=endpoint.path) @@
+Belt.Map.valuesToArray(endpointRegistry)->Belt.Array.map(endpoint => {
+  App.post(app, ~path=endpoint.path) @@
   PromiseMiddleware.from((_, req, res) => {
     Js.log("/route_alerts")
     Response.setHeader("Access-Control-Allow-Origin", "*", res);
@@ -54,16 +42,8 @@ App.post(app, ~path=endpoint.path) @@
         resolve(Response.sendJson(response, res))
       })
     );
-  });
-
-
-App.post(app, ~path="/route_alerts-axios") @@
-  PromiseMiddleware.from((_, _, res) => {
-    Js.Promise.(
-      Axios.get(mapApi)
-      |> then_(response => resolve(Response.sendJson(response##data, res)))
-    )
-  });
+  }); 
+});
 
 App.options(app, ~path="/promise") @@
 Middleware.from((_, _, res) => {
@@ -80,25 +60,6 @@ App.get(app, ~path="/promise") @@
       |> then_(s => resolve(Response.sendString(s, res)))      
     )
   });
-
-// PromiseMiddleware.from((req, next, res) => {
-//   Js.Promise.(
-//     make((~resolve, ~reject as _) => {
-//       [@bs] resolve("s");
-// )
-
-//     |> then_(s => resolve(Response.sendString(s, res)));
-//   );
-//);
-
-  // Response.setHeader("Access-Control-Allow-Origin", "*", res);
-  // Js.log(Request.bodyJSON(req));
-  // Request.bodyJSON(req)
-  // ->getExn
-  // ->createRouteAlertEffectHandler(networkBridge, json => {
-  //   Js.Promise.resolve(Response.sendJson(json));
-  // });
-//  ->Response.sendJson(res);
 
 App.get(app, ~path="/") @@
 Middleware.from((_req, _next) => Response.sendString("Hello, World!"));
