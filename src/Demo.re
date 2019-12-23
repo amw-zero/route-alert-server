@@ -1,5 +1,4 @@
 open Express;
-open Belt.List;
 open Belt.Option;
 open RouteAlertBehavior;
 
@@ -18,11 +17,11 @@ let router = router();
  forEach(requests, r => App.get(app, ~path=r) @@ Middleware.from((_req, _next) => Response.sendString("test")))
  */
 
-let networkBridge = (request, respond) => {
+let networkBridge = (request: serverRequest, respond) => {
   Js.Promise.(  
     Axios.get(request.path)
     |> then_(response => resolve(respond(response##data)))
-  );
+  ) |> ignore;
 };
 
 App.use(app, Middleware.json());
@@ -36,8 +35,10 @@ Middleware.from((_, _, res) => {
 
 let mapApi = "https://maps.googleapis.com/maps/api/directions/json?origin=Port+Authority&destination=20+Remington+Dr+Freehold&key=AIzaSyC6AfIwElNGcfmzz-XyBHUb3ftWb2SL2vU&departure_time=now"
 
-App.post(app, ~path="/route_alerts") @@
-  PromiseMiddleware.from((next, req, res) => {
+let endpoint = Belt.Map.getExn(endpointRegistry, RouteAlertCreate);
+
+App.post(app, ~path=endpoint.path) @@
+  PromiseMiddleware.from((_, req, res) => {
     Js.log("/route_alerts")
     Response.setHeader("Access-Control-Allow-Origin", "*", res);
     Js.Promise.(
@@ -57,17 +58,25 @@ App.post(app, ~path="/route_alerts") @@
 
 
 App.post(app, ~path="/route_alerts-axios") @@
-  PromiseMiddleware.from((req, next, res) => {
+  PromiseMiddleware.from((_, _, res) => {
     Js.Promise.(
       Axios.get(mapApi)
       |> then_(response => resolve(Response.sendJson(response##data, res)))
     )
   });
 
+App.options(app, ~path="/promise") @@
+Middleware.from((_, _, res) => {
+  Response.setHeader("Access-Control-Allow-Origin", "*", res);
+  Response.setHeader("Access-Control-Allow-Headers", "*", res);
+  Response.sendString("", res);
+});
+
 App.get(app, ~path="/promise") @@
- PromiseMiddleware.from((req, next, res) => {
+ PromiseMiddleware.from((_, _, res) => {
+    Response.setHeader("Access-Control-Allow-Origin", "*", res);  
     Js.Promise.(
-      make((~resolve, ~reject as _) => setTimeout(() => [@bs] resolve("test string"), 5_000) |> ignore)
+      make((~resolve, ~reject as _) => setTimeout(() => [@bs] resolve("test string"), 1_000) |> ignore)
       |> then_(s => resolve(Response.sendString(s, res)))      
     )
   });

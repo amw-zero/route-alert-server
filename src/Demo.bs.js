@@ -6,6 +6,7 @@ var Axios = require("axios");
 var Js_exn = require("bs-platform/lib/js/js_exn.js");
 var Express = require("bs-express/src/Express.js");
 var Process = require("process");
+var Belt_Map = require("bs-platform/lib/js/belt_Map.js");
 var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
 var Caml_js_exceptions = require("bs-platform/lib/js/caml_js_exceptions.js");
 var RouteAlertBehavior = require("route-alert-behavior/src/RouteAlertBehavior.bs.js");
@@ -15,9 +16,10 @@ var app = Express.express(/* () */0);
 var router = Express.router(undefined, undefined, undefined, /* () */0);
 
 function networkBridge(request, respond) {
-  return Axios.get(request.path).then((function (response) {
-                return Promise.resolve(Curry._1(respond, response.data));
-              }));
+  Axios.get(request.path).then((function (response) {
+          return Promise.resolve(Curry._1(respond, response.data));
+        }));
+  return /* () */0;
 }
 
 Express.App.use(app, Express.Middleware.json(undefined, undefined, undefined, /* () */0));
@@ -30,7 +32,9 @@ Express.App.options(app, "/route_alerts", Express.Middleware.from((function (par
 
 var mapApi = "https://maps.googleapis.com/maps/api/directions/json?origin=Port+Authority&destination=20+Remington+Dr+Freehold&key=AIzaSyC6AfIwElNGcfmzz-XyBHUb3ftWb2SL2vU&departure_time=now";
 
-Express.App.post(app, "/route_alerts", Express.PromiseMiddleware.from((function (next, req, res) {
+var endpoint = Belt_Map.getExn(RouteAlertBehavior.endpointRegistry, /* RouteAlertCreate */0);
+
+Express.App.post(app, endpoint.path, Express.PromiseMiddleware.from((function (param, req, res) {
             console.log("/route_alerts");
             Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
             return new Promise((function (resolve, param) {
@@ -44,17 +48,24 @@ Express.App.post(app, "/route_alerts", Express.PromiseMiddleware.from((function 
                         }));
           })));
 
-Express.App.post(app, "/route_alerts-axios", Express.PromiseMiddleware.from((function (req, next, res) {
+Express.App.post(app, "/route_alerts-axios", Express.PromiseMiddleware.from((function (param, param$1, res) {
             return Axios.get(mapApi).then((function (response) {
                           return Promise.resolve(Express.$$Response.sendJson(response.data, res));
                         }));
           })));
 
-Express.App.get(app, "/promise", Express.PromiseMiddleware.from((function (req, next, res) {
+Express.App.options(app, "/promise", Express.Middleware.from((function (param, param$1, res) {
+            Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
+            Express.$$Response.setHeader("Access-Control-Allow-Headers", "*", res);
+            return Express.$$Response.sendString("", res);
+          })));
+
+Express.App.get(app, "/promise", Express.PromiseMiddleware.from((function (param, param$1, res) {
+            Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
             return new Promise((function (resolve, param) {
                             setTimeout((function (param) {
                                     return resolve("test string");
-                                  }), 5000);
+                                  }), 1000);
                             return /* () */0;
                           })).then((function (s) {
                           return Promise.resolve(Express.$$Response.sendString(s, res));
@@ -92,6 +103,7 @@ exports.app = app;
 exports.router = router;
 exports.networkBridge = networkBridge;
 exports.mapApi = mapApi;
+exports.endpoint = endpoint;
 exports.onListen = onListen;
 exports.server = server;
 /* app Not a pure module */
