@@ -23,7 +23,6 @@ Middleware.from((_, _, res) => {
   Response.sendString("", res);
 });
 
-
 Belt.Map.valuesToArray(endpointRegistry)->Belt.Array.map(endpoint => {
   App.post(app, ~path=endpoint.path) @@
   PromiseMiddleware.from((_, req, res) => {
