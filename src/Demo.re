@@ -27,7 +27,7 @@ Middleware.from((_, _, res) => {
 Belt.Map.valuesToArray(endpointRegistry)->Belt.Array.map(endpoint => {
   App.post(app, ~path=endpoint.path) @@
   PromiseMiddleware.from((_, req, res) => {
-    Js.log("/route_alerts")
+    Js.log(endpoint.path)
     Response.setHeader("Access-Control-Allow-Origin", "*", res);
     Js.Promise.(
       make((~resolve, ~reject as _) => {

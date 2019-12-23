@@ -33,7 +33,7 @@ Express.App.options(app, "/route_alerts", Express.Middleware.from((function (par
 
 Belt_Array.map(Belt_Map.valuesToArray(RouteAlertBehavior.endpointRegistry), (function (endpoint) {
         return Express.App.post(app, endpoint.path, Express.PromiseMiddleware.from((function (param, req, res) {
-                          console.log("/route_alerts");
+                          console.log(endpoint.path);
                           Express.$$Response.setHeader("Access-Control-Allow-Origin", "*", res);
                           return new Promise((function (resolve, param) {
                                           RouteAlertBehavior.createRouteAlertEffectHandler(Belt_Option.getExn(Express.$$Request.bodyJSON(req)), networkBridge, (function (json) {
